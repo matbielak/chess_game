@@ -10,8 +10,11 @@ const initialState = {
         ['-','-','-','-','-','-','-','-'],
         ['P','P','P','P','P','P','P','P'],
         ['R','N','B','Q','K','B','N','R'],
-       
-    ]
+    ],
+    whiteMove: true,
+    whiteInCheck: false,
+    blackInCheck: false,
+    mate: false,
 }
 
 const ChessBoardSlice = createSlice({
@@ -23,7 +26,14 @@ const ChessBoardSlice = createSlice({
             const newBoard = state.board.map((row)=>[...row]);
             newBoard[from.r][from.c] = '-';
             newBoard[to.r][to.c] = piece;
-            state.board = newBoard
+
+            const newWhiteMove = !state.whiteMove;
+            
+            return {
+                board: newBoard,
+                whiteMove: newWhiteMove,
+
+            }
         },
         resetBoard: () => initialState,
     }
