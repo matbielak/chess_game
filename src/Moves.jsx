@@ -1,8 +1,8 @@
 const validCell = (x,y) => {
     return x>=0 && x<=7 && y>=0 && y<=7
 } 
-const whitep = ['P','B','N','R','Q','K'];
-const blackp = ['p','b','n','r','q','k'];
+const whitep = ['P','B','N','R','Q','K','t'];
+const blackp = ['p','b','n','r','q','k','t'];
 
 const getPawnMoves = (x,y,board,isWhite) => { 
     const validMoves = [];
@@ -150,6 +150,7 @@ export const getMoves = (x,y,board) => {
     }
     
 }
+
 const getPawnAttackingMoves = (x,y,board,isWhite) => { 
     const validMoves = [];
     const direction = isWhite ? -1:1;
@@ -166,6 +167,7 @@ const getPawnAttackingMoves = (x,y,board,isWhite) => {
     return validMoves;
 
 }
+
 export const getAttackingMoves = (x,y,board) => {
     const piece = board[x][y];
     if(piece == '-')
@@ -183,9 +185,6 @@ export const getAttackingMoves = (x,y,board) => {
     }
     
 }
-
-
-
 
 export const isCellAttacked = (x,y,board,isWhite) => {
     const attacking = isWhite ? blackp : whitep;
@@ -233,7 +232,6 @@ export const isMoveLegal2 = (board,fr,fc,tr,tc) => {
     
 }
 
-
 export const canDropPiece = (payload,board,whiteMove) => {
      const {from,to,piece} = payload;
      if((whiteMove && blackp.includes(piece))||(!whiteMove && whitep.includes(piece))){
@@ -255,9 +253,6 @@ export const canDropPiece = (payload,board,whiteMove) => {
 
 
 }
-
-
-
 
 export const getAllLegalMoves = (board,forWhite) => {
     var legalMoves = 0;
@@ -282,4 +277,52 @@ export const isKingInCheck = (board,isWhite)=>{
     const [kx,ky] = findKing(board,isWhite);
     return isCellAttacked(kx,ky,board,isWhite);
 
+}
+
+export const isPromotion = (fr,tr,p) => {
+    
+    if(p == 'p' && fr == 6 && tr == 7)
+        return true;
+    if(p == 'P' && fr == 1 && tr == 0)
+        return true;
+    return false;
+}
+
+export const isDoublePawnMove = (fr,tr,p) => {
+    if(p == 'p' && fr == 1 && tr == 3)
+        return true;
+    if(p == 'P' && fr == 6 && tr == 4)
+        return true;
+    return false;
+}
+
+export const canCastle = (board,from,to,castlingRights) => {
+    if(from.r==7 && to.r==7 && from.c==4 && to.c==6 && castlingRights[3]=='1'){
+        //white kingside
+        const attacked = (isCellAttacked(7,4,board,true) || isCellAttacked(7,5,board,true) || isCellAttacked(7,6,board,true));
+        const empty = (board[7][5]=='-' && board[7][6]=='-');
+
+        return !attacked && empty;
+    }
+    if(from.r==7 && to.r==7 && from.c==4 && to.c==2 && castlingRights[2]=='1'){
+        //white queenside
+        const attacked = (isCellAttacked(7,4,board,true) || isCellAttacked(7,3,board,true) || isCellAttacked(7,2,board,true) || isCellAttacked(7,1,board,true));
+        const empty = (board[7][3]=='-' && board[7][2]=='-' && board[7][1] == '-');
+
+        return !attacked && empty;
+    }
+    if(from.r==0 && to.r==0 && from.c==4 && to.c==6 && castlingRights[1]=='1'){
+        //black kingside
+        const attacked = (isCellAttacked(0,4,board,false) || isCellAttacked(0,5,board,false) || isCellAttacked(0,6,board,false));
+        const empty = (board[0][5]=='-' && board[0][6]=='-');
+        return !attacked && empty;
+    }
+    if(from.r==0 && to.r==0 && from.c==4 && to.c==2  && castlingRights[0]=='1'){
+        //black queenside
+        const attacked = (isCellAttacked(0,4,board,false) || isCellAttacked(0,3,board,false) || isCellAttacked(0,2,board,false));
+        const empty = (board[0][3]=='-' && board[0][2]=='-' && board[0][1]=='-');
+        return !attacked && empty;
+    }
+        
+    return false;
 }

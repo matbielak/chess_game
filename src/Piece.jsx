@@ -38,7 +38,8 @@ function renderPiece(type,drag){
             return <img src={wp} ref={drag} className='piece'/> 
         case 'p':
             return <img src={bp} ref={drag} className='piece'/> 
-    
+        // case 't': 
+        //     return <div>t</div>
         default:
             return null
     }

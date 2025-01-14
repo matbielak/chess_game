@@ -45,4 +45,5 @@
   height: 100px;
   width: 100px;
   background-color: 'transparent';
+  transform: translate(0, 0);
 }
