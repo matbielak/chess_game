@@ -2,8 +2,9 @@ import React from 'react'
 import Square from './Square'
 import { useSelector, useDispatch } from 'react-redux'
 import BoardSquare from './BoardSquare'
-import { resetBoard } from './ChessBoardSlice'
-import { isKingInCheck,getAllLegalMoves } from './Moves'
+import { changeBoard, resetBoard, setHistMove } from './ChessBoardSlice'
+import { isKingInCheck,getAllLegalMoves, mapMove} from './Moves'
+import { ESModulesEvaluator } from 'vite/module-runner'
 function Board() {
     const dispatch = useDispatch();
     const board = useSelector((state) => state.chessboard.board)
@@ -12,11 +13,37 @@ function Board() {
     const blackCheck = isKingInCheck(board,false);
     const legalMoves = getAllLegalMoves(board,!whiteMove);
     const castlingRights = useSelector((state) => state.chessboard.castlingRights)
-
+    const moves = useSelector((state) => state.chessboard.moves)
+    const histMove = useSelector((state) => state.chessboard.histMove)
+    const pgn = useSelector((state) => state.chessboard.pgn )
+    const noMoves = moves.length-1;
+    const handleBack = () =>{
+      if(histMove>0){
+        console.log(`Hist move: ${histMove}`)
+        dispatch(changeBoard(histMove-1))
+      }
+      
+    }
+    const handleNext = () => {
+      if(histMove<noMoves){
+        dispatch(changeBoard(histMove+1))
+        dispatch(setHistMove(histMove+1))
+      }
+      
+    }
 
   return (
-    <> 
-    <div>{castlingRights}</div>
+    <>
+    {
+      pgn.map((move,idx)=> {
+        if(idx%2==0)
+          return (idx/2+1) + ". " + move + " ";
+        return move + " "; 
+      })
+    }
+    <button onClick={handleBack}>Back</button>
+    <button onClick={handleNext}>Next</button>
+    {/* <div>{castlingRights}</div> */}
     {blackCheck && legalMoves==0 && <div>WHITE WINS</div>}
     {whiteCheck && legalMoves==0 && <div>BLACK WINS</div>}
     {!whiteCheck && !blackCheck && legalMoves==0 && <div>DRAW</div>}

@@ -3,6 +3,7 @@ const validCell = (x,y) => {
 } 
 const whitep = ['P','B','N','R','Q','K','t'];
 const blackp = ['p','b','n','r','q','k','t'];
+const cols = ['a','b','c','d','e','f','g','h'];
 
 const getPawnMoves = (x,y,board,isWhite) => { 
     const validMoves = [];
@@ -301,28 +302,50 @@ export const canCastle = (board,from,to,castlingRights) => {
         //white kingside
         const attacked = (isCellAttacked(7,4,board,true) || isCellAttacked(7,5,board,true) || isCellAttacked(7,6,board,true));
         const empty = (board[7][5]=='-' && board[7][6]=='-');
-
-        return !attacked && empty;
+        const isRook = board[7][7] == 'R';
+        return !attacked && empty && isRook;
     }
     if(from.r==7 && to.r==7 && from.c==4 && to.c==2 && castlingRights[2]=='1'){
         //white queenside
         const attacked = (isCellAttacked(7,4,board,true) || isCellAttacked(7,3,board,true) || isCellAttacked(7,2,board,true) || isCellAttacked(7,1,board,true));
         const empty = (board[7][3]=='-' && board[7][2]=='-' && board[7][1] == '-');
-
-        return !attacked && empty;
+        const isRook = board[7][0] == 'R';
+        return !attacked && empty && isRook;
     }
     if(from.r==0 && to.r==0 && from.c==4 && to.c==6 && castlingRights[1]=='1'){
         //black kingside
         const attacked = (isCellAttacked(0,4,board,false) || isCellAttacked(0,5,board,false) || isCellAttacked(0,6,board,false));
         const empty = (board[0][5]=='-' && board[0][6]=='-');
-        return !attacked && empty;
+        const isRook = board[0][7] == 'r';
+        return !attacked && empty && isRook;
     }
     if(from.r==0 && to.r==0 && from.c==4 && to.c==2  && castlingRights[0]=='1'){
         //black queenside
         const attacked = (isCellAttacked(0,4,board,false) || isCellAttacked(0,3,board,false) || isCellAttacked(0,2,board,false));
         const empty = (board[0][3]=='-' && board[0][2]=='-' && board[0][1]=='-');
-        return !attacked && empty;
+        const isRook = board[0][0] == 'r';
+        return !attacked && empty && isRook;
     }
         
     return false;
+}
+
+export const mapMove = (from,to,piece,boardBefore,boardAfter) => {
+    var x = "";
+    var plus = "";
+    const r = 8 - to.r
+    const whiteMove = !whitep.includes(piece);
+   
+    if(piece.toLowerCase() == 'p'){
+        return  (boardBefore[to.r][to.c]!='-'?  cols[from.c] + "x" : "") + cols[to.c] + "" + r + (isKingInCheck(boardAfter,whiteMove) ? "+" : "");
+    }
+    
+
+    if(boardBefore[to.r][to.c]!='-')
+        x = "x";
+    if(isKingInCheck(boardAfter,whiteMove)){
+        plus="+";
+    }
+    
+    return piece + "" + x + "" + cols[to.c] + "" + r + "" + plus;
 }

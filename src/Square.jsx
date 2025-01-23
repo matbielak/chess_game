@@ -5,7 +5,7 @@ import Piece from './Piece';
 import { useDrop } from 'react-dnd';
 import { useSelector } from 'react-redux';
 import {dropPiece} from './Game';
-import { canCastle, canDropPiece, getAllLegalMoves, isCellAttacked ,isDoublePawnMove,isKingInCheck, isPromotion} from './Moves';
+import { canCastle, canDropPiece, getAllLegalMoves, isCellAttacked ,isDoublePawnMove,isKingInCheck, isPromotion, mapMove} from './Moves';
 const horizontal = [
     'a','b','c','d','e','f','g','h'
 ];
@@ -15,10 +15,17 @@ function Square({row,col,piece}) {
     const board = useSelector((state) => state.chessboard.board)
     const whiteMove = useSelector((state) => state.chessboard.whiteMove)
     const castlingRights = useSelector((state) => state.chessboard.castlingRights)
+    const lastMove = useSelector((state) => state.chessboard.lastMove)
+    const histMove = useSelector((state) => state.chessboard.histMove)
+    const moves = useSelector((state) => state.chessboard.moves)
+    const lastHistMoves = useSelector((state) => state.chessboard.lastHistMoves)
+    const noMoves = moves.length - 1
     const dispatch = useDispatch();
     const [{isOver,canDrop},drop] = useDrop(()=>({
             accept: 'piece',
             canDrop: (item)=>{
+              if(histMove < noMoves)
+                return false;
               const {r,c,p} = item;
               // if(r==row && c==col)
               //   return false;
@@ -54,10 +61,12 @@ function Square({row,col,piece}) {
                 const {r,c,p} = item;
                 const newPiece = isPromotion(r,row,p) ? (whiteMove ? 'Q' : 'q') : p;
                 const enPassant = piece2 == 't' && (p == 'P' || p == 'p');
+                
                 if(enPassant){
                   const direction = p=='p' ? 1 : -1;
                   dispatch(enP([row-direction,col]))
                 }
+
                 const updateTempRow = whiteMove ? 2 : 5;
                 for(let i=0;i<=7;i++)
                   dispatch(deleteTemps([updateTempRow,i]))
@@ -92,6 +101,7 @@ function Square({row,col,piece}) {
                     piece: newPiece
 
                 };
+               
                 if(p=='r' && r==0 && c==0){
                   dispatch(changeCastlingRights(0))
                 }
@@ -142,15 +152,8 @@ function Square({row,col,piece}) {
                     }
                   }
                 }
-
-               // console.log(payload)
-               
                 dispatch(updateSquare(payload));
-                const legal = getAllLegalMoves(board,whiteMove);
-                console.log(`Legal Moves:${legal}`)
-               // console.log(`From ${p}${horizontal[c]}${7-r+1} To ${piece2}${horizontal[col]}${7-row+1}`);
-                
-                
+               
             },
             collect: (monitor) => ({
                 isOver: !!monitor.isOver(),
@@ -162,6 +165,24 @@ function Square({row,col,piece}) {
             console.log(`${row} ${col} attacked: ${isCellAttacked(row,col,board,whiteMove)} by ${whiteMove ? `black` : `white`}`);
         }
         
+        
+        const isLastMoveSquare = () => {
+          if(!lastMove)
+            return false;
+          
+          const {from,to} = lastMove; 
+          return (from.r==row && from.c == col) || (to.r==row && to.c==col);
+        }
+        const isLastMoveSquare2 = () => {
+          if(lastHistMoves.length==0)
+            return false;
+         // console.log(lastHistMoves[0])
+        //  console.log(histMove);
+          if(histMove-1<0)
+            return false;   
+          const {from,to} = lastHistMoves[histMove-1]; 
+          return (from.r==row && from.c == col) || (to.r==row && to.c==col);
+        }
   return (
     <div
     ref={drop}
@@ -169,7 +190,7 @@ function Square({row,col,piece}) {
       style={{
         width: '100px',
         height: '100px',
-        backgroundColor: (row + col) % 2 === 0 ? 'gray' : 'green',
+        backgroundColor: !isLastMoveSquare2() ? (row + col) % 2 === 0 ? '#eeeed2' : '	#769656' : '	#baca44',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
