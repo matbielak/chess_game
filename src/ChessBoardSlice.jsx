@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { mapMove } from "./Moves";
+import { mapMove, toFen } from "./Moves";
 const startingBoard =  [
         ['r','n','b','q','k','b','n','r'],
         ['p','p','p','p','p','p','p','p'],
@@ -10,6 +10,7 @@ const startingBoard =  [
         ['P','P','P','P','P','P','P','P'],
         ['R','N','B','Q','K','B','N','R'],
 ];
+const startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const initialState = {
     moves: [startingBoard],
     board: startingBoard,
@@ -22,6 +23,8 @@ const initialState = {
     histMove: 0,
     lastHistMoves: [],
     pgn: [],
+    fen: startingFen,
+
 }
 
 const ChessBoardSlice = createSlice({
@@ -56,7 +59,7 @@ const ChessBoardSlice = createSlice({
                 newLastHistMoves.push(lastMove)
             }
             
-            
+            const newFen = toFen(newBoard,newWhiteMove,state.castlingRights,newPgn.length,lastMove)
             
             return {
                 ...state,
@@ -67,6 +70,7 @@ const ChessBoardSlice = createSlice({
                 histMove: newHistMove,
                 lastHistMoves: newLastHistMoves,
                 pgn: newPgn,
+                fen: newFen,
             }
         },
         resetBoard: () => initialState,
@@ -89,7 +93,7 @@ const ChessBoardSlice = createSlice({
         enP: (state,action) => {
             const [row,col] = action.payload;
             const newBoard = state.board.map((row)=>[...row]);
-           
+            
             if(state.board[row][col].toLowerCase()=='p')
                 newBoard[row][col] = '-';
             
@@ -204,9 +208,17 @@ const ChessBoardSlice = createSlice({
                 ...state,
                 histMove: idx,
             }
+        },
+        setFen: (state,action)=> {
+            const fen = toFen(state.board,state.whiteMove,state.castlingRights,state.pgn.length,state.lastMove)
+            return {
+                ...state,
+                fen: fen,
+            }
         }
+
     }
 })
 
-export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove} = ChessBoardSlice.actions;
+export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove,setFen} = ChessBoardSlice.actions;
 export default ChessBoardSlice.reducer;

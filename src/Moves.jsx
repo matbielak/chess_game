@@ -349,3 +349,73 @@ export const mapMove = (from,to,piece,boardBefore,boardAfter) => {
     
     return piece + "" + x + "" + cols[to.c] + "" + r + "" + plus;
 }
+
+
+export const toFen = (board,whiteMove,castlingRights,moveNumber,lastMove) => {
+    var fen = ""
+    var nuls = 0;
+   // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+    for(let r=0;r<=7;r++){
+        nuls = 0;
+        for(let c=0;c<=7;c++){
+            if(whitep.slice(0,-1).includes(board[r][c]) || blackp.slice(0,-1).includes(board[r][c])){
+                if(nuls>0){
+                    fen += nuls;
+                    nuls = 0;
+                }
+                fen += board[r][c];
+                
+               
+            }
+            else{
+                nuls++;
+            }
+        }
+        if(nuls>0){
+            fen+= nuls;
+            nuls = 0;
+        }
+        if(r<7){
+            fen += "/";
+        }  
+        
+            
+    }
+    fen += ' ';
+    fen += whiteMove==true ? 'w' : 'b';
+    fen += ' ';
+    fen += castlingRights[3] === '1' ? 'K' : '-';
+    fen += castlingRights[2] === '1' ? 'Q' : '-';
+    fen += castlingRights[1] === '1' ? 'k' : '-';
+    fen += castlingRights[0] === '1' ? 'q' : '-';
+    fen += ' ';
+    if(!lastMove)
+        fen += '-';
+    else{
+        const {from,to} = lastMove;
+            if(Math.abs(from.r-to.r)==2 && from.c==to.c && board[to.r][to.c].toLowerCase()==='p'){
+                if(whitep.includes(board[to.r][to.c])){
+                    console.log(board[to.r][to.c]);
+                    
+                    fen += cols[to.c] + '' + (7-to.r)
+                }
+                else{
+                    console.log("bkack");
+                    console.log(from.r,to.r);
+                    
+                    fen += cols[to.c] + '' + (7-to.r+2)
+                }
+            }
+            else{
+                fen += '-';
+            }
+
+            fen += ' ';
+            fen += "0";
+            fen += ' ';
+            fen += moveNumber;
+    }
+    
+
+    return fen;
+}

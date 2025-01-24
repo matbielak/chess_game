@@ -3,7 +3,7 @@ import Square from './Square'
 import { useSelector, useDispatch } from 'react-redux'
 import BoardSquare from './BoardSquare'
 import { changeBoard, resetBoard, setHistMove } from './ChessBoardSlice'
-import { isKingInCheck,getAllLegalMoves, mapMove} from './Moves'
+import { isKingInCheck,getAllLegalMoves, mapMove, toFen} from './Moves'
 import { ESModulesEvaluator } from 'vite/module-runner'
 function Board() {
     const dispatch = useDispatch();
@@ -14,9 +14,11 @@ function Board() {
     const legalMoves = getAllLegalMoves(board,!whiteMove);
     const castlingRights = useSelector((state) => state.chessboard.castlingRights)
     const moves = useSelector((state) => state.chessboard.moves)
+    const lastMove = useSelector((state) => state.chessboard.lastMove)
     const histMove = useSelector((state) => state.chessboard.histMove)
     const pgn = useSelector((state) => state.chessboard.pgn )
     const noMoves = moves.length-1;
+    const fen =  useSelector((state) => state.chessboard.fen )
     const handleBack = () =>{
       if(histMove>0){
         console.log(`Hist move: ${histMove}`)
@@ -34,6 +36,8 @@ function Board() {
 
   return (
     <>
+    {/* {<div>{toFen(board,whiteMove,castlingRights,pgn.length,lastMove)} </div>} */}
+    <div>{fen}</div>
     {
       pgn.map((move,idx)=> {
         if(idx%2==0)
