@@ -1,13 +1,62 @@
-import React from 'react'
+
 import Square from './Square'
 import { useSelector, useDispatch } from 'react-redux'
-import BoardSquare from './BoardSquare'
-import { changeBoard, resetBoard, setHistMove } from './ChessBoardSlice'
-import { isKingInCheck,getAllLegalMoves, mapMove, toFen} from './Moves'
-import { ESModulesEvaluator } from 'vite/module-runner'
+import { changeBoard, resetBoard, setHistMove,flip, updateSquare} from './ChessBoardSlice'
+import { isKingInCheck,getAllLegalMoves,fromStockFish,isCastle} from './Moves'
+import { useEffect,useState } from 'react'
 function Board() {
-    const dispatch = useDispatch();
-    const board = useSelector((state) => state.chessboard.board)
+  const [worker,setWorker] = useState(null);
+      const [output,setOutput] = useState("Output");
+      const [isReady,setIsReady] = useState(false);
+      const [fromS,setFromS] = useState("");
+      const [oldFromS,setOldFromS] = useState(0);
+      const dispatch = useDispatch();
+      const board = useSelector((state) => state.chessboard.board)
+      const fen =  useSelector((state) => state.chessboard.fen )
+      useEffect(()=>{
+          const stockfishWorker = new Worker("/stockfish/stockfish-16.1-lite-single.js");
+          setWorker(stockfishWorker);
+  
+          stockfishWorker.onmessage = (event) => {
+              const message = event.data;
+              console.log("GOT MESSAGE");
+              
+              if(message === 'readyok'){
+                  setIsReady(true);
+                  console.log("STOCKFISH IS READY");
+                  
+              }
+              else if(message.startsWith('bestmove')){
+                  const move = message.split(" ")[1];
+                  
+                  setOutput(move);
+                  // if(board[from.r][from.c]!='-') {
+                  //   setOutput(move);
+                  // }
+              }
+  
+              
+          };
+  
+          return () => {
+              stockfishWorker.terminate();
+          };
+  
+      },[]);
+  
+      
+  
+      // const startAnalysis = () => {
+      //     sendCommand('uci');
+      //     sendCommand('isready');
+          
+      //     sendCommand('position startpos');
+      //     sendCommand('go depth 10');
+      // }
+      
+
+    
+    
     const whiteMove = useSelector((state) => state.chessboard.whiteMove)
     const whiteCheck = isKingInCheck(board,true);
     const blackCheck = isKingInCheck(board,false);
@@ -17,8 +66,9 @@ function Board() {
     const lastMove = useSelector((state) => state.chessboard.lastMove)
     const histMove = useSelector((state) => state.chessboard.histMove)
     const pgn = useSelector((state) => state.chessboard.pgn )
+    const game = useSelector((state) => state.chessboard.game )
     const noMoves = moves.length-1;
-    const fen =  useSelector((state) => state.chessboard.fen )
+    const flipped =  useSelector((state) => state.chessboard.flipped )
     const handleBack = () =>{
       if(histMove>0){
         console.log(`Hist move: ${histMove}`)
@@ -33,20 +83,75 @@ function Board() {
       }
       
     }
+    const trSqr = (n) => {
+      if(flipped) 
+        return 7 - n;
+      else 
+        return n;
+    }
+    const flipBoard = () => {
+      console.log(flipped); 
+      dispatch(flip());
+      
+      
+    }
 
+      useEffect(()=>{
+        const sendCommand = (command) => {
+          if(worker){
+              console.log('Sending command to Stockfish: ',command);
+              worker.postMessage(command);
+          }
+        };
+        const getBestMove = () => {
+          sendCommand('uci');
+          sendCommand('ucinewgame');
+          sendCommand(`position fen ${fen}`);
+          sendCommand("go depth 5");
+        }
+        if(game){
+          if(whiteMove==false && oldFromS===0){
+            setOldFromS(1);
+            getBestMove()
+            
+            setTimeout(() => {
+              console.log("Output:",output);
+              
+              const m = fromStockFish(output,board);
+              console.log(m)
+              setOldFromS(1)
+              setFromS(m);
+              const castle = isCastle(m);
+              console.log("Castle: ",castle);
+              dispatch(updateSquare(fromS))
+            }, 5000);
+            
+
+          }
+          else if(whiteMove){
+          
+            setOldFromS(0);
+          }
+        }
+        
+         
+
+      },[whiteMove,fen,worker,board,output,dispatch,fromS,oldFromS,game])
   return (
     <>
     {/* {<div>{toFen(board,whiteMove,castlingRights,pgn.length,lastMove)} </div>} */}
+    <div>{output}</div>
     <div>{fen}</div>
-    {
+    {/* {
       pgn.map((move,idx)=> {
         if(idx%2==0)
           return (idx/2+1) + ". " + move + " ";
         return move + " "; 
       })
-    }
+    } */}
     <button onClick={handleBack}>Back</button>
     <button onClick={handleNext}>Next</button>
+    <button onClick={flipBoard}>Flip</button>
     {/* <div>{castlingRights}</div> */}
     {blackCheck && legalMoves==0 && <div>WHITE WINS</div>}
     {whiteCheck && legalMoves==0 && <div>BLACK WINS</div>}
@@ -61,7 +166,7 @@ function Board() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)'}}>
       {board.map((row, rowIndex) =>
         row.map((square, colIndex) => (
-          <Square key={`${rowIndex}-${colIndex}`} row={rowIndex} col={colIndex} piece={square} />
+          <Square key={`${rowIndex}-${colIndex}`} row={trSqr(rowIndex)} col={trSqr(colIndex)} piece={square} />
         ))
       )}
     </div>

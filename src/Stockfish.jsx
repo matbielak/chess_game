@@ -6,7 +6,7 @@ function Stockfish() {
     const [isReady,setIsReady] = useState(false);
     const fen =  useSelector((state) => state.chessboard.fen )
     useEffect(()=>{
-        const stockfishWorker = new Worker("/stockfish/stockfish-16.1-single.js");
+        const stockfishWorker = new Worker("/stockfish/stockfish-16.1-lite-single.js");
         setWorker(stockfishWorker);
 
         stockfishWorker.onmessage = (event) => {
@@ -15,6 +15,8 @@ function Stockfish() {
           //  setOutput((prev)=>[...prev,message]);
             if(message === 'readyok'){
                 setIsReady(true);
+                console.log("STOCKFISH IS READY");
+                
             }
             else if(message.startsWith('bestmove')){
                 const move = message.split(" ")[1];
@@ -50,9 +52,9 @@ function Stockfish() {
     }
   return (
      <>
-        <div>Stockfish</div>
-        <button onClick={startAnalysis} disabled={isReady}>Start Analysis</button>
-        <button onClick={getBestMove} disabled={isReady}>Get Best Move</button>
+        <div>Stockfish {isReady}</div>
+        <button onClick={startAnalysis} disabled={false}>Start Analysis</button>
+        <button onClick={getBestMove} disabled={!isReady}>Get Best Move</button>
         <div>
             <h2>Engine output:</h2>
             <pre style={{maxHeight:'300px', overflowY:'scroll'}}>

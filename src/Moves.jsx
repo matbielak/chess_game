@@ -4,6 +4,16 @@ const validCell = (x,y) => {
 const whitep = ['P','B','N','R','Q','K','t'];
 const blackp = ['p','b','n','r','q','k','t'];
 const cols = ['a','b','c','d','e','f','g','h'];
+const mapCols = {
+    a:0,
+    b:1,
+    c:2,
+    d:3,
+    e:4,
+    f:5,
+    g:6,
+    h:7,
+};
 
 const getPawnMoves = (x,y,board,isWhite) => { 
     const validMoves = [];
@@ -418,4 +428,43 @@ export const toFen = (board,whiteMove,castlingRights,moveNumber,lastMove) => {
     
 
     return fen;
+}
+
+
+export const fromStockFish = (move,board) => {
+    // e2e4
+    const fc = mapCols[move[0]];
+    const fr = 8-move[1];
+    const tc = mapCols[move[2]];
+    const tr = 8-move[3];
+
+
+    
+    const payload = {
+        from:{
+            r: fr,
+            c: fc,
+        },
+        to: {
+            r: tr,
+            c: tc,
+        },
+        piece: board[fr][fc],
+    }
+    return payload
+    
+}
+
+export const isViable = (move) => {
+    const fc = mapCols[move[0]];
+    const fr = 8-move[1];
+    const tc = mapCols[move[2]];
+    const tr = 8-move[3];       
+}
+
+export const isCastle = (payload) => {
+    const {from,to,piece} = payload;
+    if(piece.toLowerCase()==='k' && Math.abs(from.c-to.c)>1)
+        return true;
+    return false;
 }

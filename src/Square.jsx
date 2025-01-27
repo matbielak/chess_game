@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { updateSquare,deleteTemps, enP, castle, changeCastlingRights } from './ChessBoardSlice'
 import Piece from './Piece';
@@ -6,11 +6,35 @@ import { useDrop } from 'react-dnd';
 import { useSelector } from 'react-redux';
 import {dropPiece} from './Game';
 import { canCastle, canDropPiece, getAllLegalMoves, isCellAttacked ,isDoublePawnMove,isKingInCheck, isPromotion, mapMove} from './Moves';
+import Stockfish from './Stockfish';
+import { useEffect } from 'react';
 const horizontal = [
     'a','b','c','d','e','f','g','h'
 ];
 
 function Square({row,col,piece}) {
+    const [worker,setWorker] = useState(null);
+      const [output,setOutput] = useState("Output");
+      const [isReady,setIsReady] = useState(false);
+      const fen =  useSelector((state) => state.chessboard.fen )
+      
+  
+      const sendCommand = (command) => {
+          if(worker){
+              console.log('Sending command to Stockfish: ',command);
+              worker.postMessage(command);
+          }
+      };
+  
+
+      const getBestMove = () => {
+       //   sendCommand('uci');
+       //   sendCommand('isready');
+        //  sendCommand('ucinewgame');
+          sendCommand(`position fen ${fen}`)
+          sendCommand("go depth 15")
+      }
+    const stockfish = new Stockfish();
     const piece2 = useSelector((state) => state.chessboard.board[row][col])
     const board = useSelector((state) => state.chessboard.board)
     const whiteMove = useSelector((state) => state.chessboard.whiteMove)
@@ -18,15 +42,22 @@ function Square({row,col,piece}) {
     const lastMove = useSelector((state) => state.chessboard.lastMove)
     const histMove = useSelector((state) => state.chessboard.histMove)
     const moves = useSelector((state) => state.chessboard.moves)
+    const game = useSelector((state) => state.chessboard.game)
     const lastHistMoves = useSelector((state) => state.chessboard.lastHistMoves)
     const noMoves = moves.length - 1
     const dispatch = useDispatch();
+    
+
     const [{isOver,canDrop},drop] = useDrop(()=>({
             accept: 'piece',
             canDrop: (item)=>{
               if(histMove < noMoves)
                 return false;
+              
               const {r,c,p} = item;
+             // if(game && ['r','n','b','k','q','p'].includes(p))
+             //   return false;
+
               // if(r==row && c==col)
               //   return false;
               const payload = {
@@ -139,7 +170,6 @@ function Square({row,col,piece}) {
                        dispatch(castle(0))
                     }
                       
-                    return;
                   }
                   else{
                     if(p=='k'){
@@ -152,14 +182,16 @@ function Square({row,col,piece}) {
                     }
                   }
                 }
-                dispatch(updateSquare(payload));
-               
+                else{
+                  dispatch(updateSquare(payload));
+                }
+                
             },
             collect: (monitor) => ({
                 isOver: !!monitor.isOver(),
                 canDrop: !!monitor.canDrop(),
             })
-        }),[row,col,piece2,whiteMove,board,castlingRights])
+        }),[row,col,piece2,whiteMove,board,castlingRights,output])
 
         const handleClick = () =>{
             console.log(`${row} ${col} attacked: ${isCellAttacked(row,col,board,whiteMove)} by ${whiteMove ? `black` : `white`}`);

@@ -24,6 +24,8 @@ const initialState = {
     lastHistMoves: [],
     pgn: [],
     fen: startingFen,
+    flipped: false,
+    game: false,
 
 }
 
@@ -60,7 +62,6 @@ const ChessBoardSlice = createSlice({
             }
             
             const newFen = toFen(newBoard,newWhiteMove,state.castlingRights,newPgn.length,lastMove)
-            
             return {
                 ...state,
                 board: newBoard,
@@ -215,10 +216,27 @@ const ChessBoardSlice = createSlice({
                 ...state,
                 fen: fen,
             }
+        },
+        flip: (state) => {
+            var newFlipped = !state.flipped;
+            return {
+                ...state,
+                flipped: newFlipped,
+            }
+        },
+        play: (state) => {
+            var newGame = state.game;
+            if(!newGame){
+                newGame = true;
+            }
+            return {
+                ...state,
+                game: newGame,
+            }
         }
 
     }
 })
 
-export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove,setFen} = ChessBoardSlice.actions;
+export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove,setFen,flip,play} = ChessBoardSlice.actions;
 export default ChessBoardSlice.reducer;
