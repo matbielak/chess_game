@@ -26,6 +26,8 @@ const initialState = {
     fen: startingFen,
     flipped: false,
     game: false,
+    evaluation: "0.0",
+    bestMove: "Loading...",
 
 }
 
@@ -233,10 +235,28 @@ const ChessBoardSlice = createSlice({
                 ...state,
                 game: newGame,
             }
-        }
+        },
+        setEvalu: (state,action) => {
+            console.log("Action payload: ",action.payload);
+            
+            const e = action.payload;
+            return {
+                ...state,
+                evaluation: e,
+            }
+        },
+        setBestMove: (state,action) => {
+            
+            
+            const bm = action.payload;
+            return {
+                ...state,
+                bestMove: bm,
+            }
+        },
 
     }
 })
 
-export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove,setFen,flip,play} = ChessBoardSlice.actions;
+export const {updateSquare, resetBoard, deleteTemps,enP,castle,changeCastlingRights,changeBoard,setHistMove,setFen,flip,play,setEvalu,setBestMove} = ChessBoardSlice.actions;
 export default ChessBoardSlice.reducer;

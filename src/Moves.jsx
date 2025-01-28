@@ -468,3 +468,27 @@ export const isCastle = (payload) => {
         return true;
     return false;
 }
+
+export const getEval = (message,whiteMove) => {
+    let result = {move: "",evaluation:""}
+    if(message.startsWith("bestmove")){
+        result.move = message.split(" ")[1];
+    }
+    if(message.includes("info") && message.includes("score")){
+        const parts = message.split(" ");
+        const idx = parts.indexOf("score") + 2;
+
+        if(parts[idx-1]==="cp"){
+            let score = parseInt(parts[idx],10);
+            if(!whiteMove){
+                score *= -1;
+            }
+            result.evaluation = `${score/100}`;
+        }
+        else if(parts[idx-1]==="mate"){
+            const mate = parseInt(parts[idx],10);
+            result.evaluation = `M${Math.abs(mate)}`
+        }
+    }
+    return result
+}

@@ -3,6 +3,7 @@ import './App.css'
 import Board from './Board'
 
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import Menu from './Menu'
 
 function App() {
 
@@ -13,7 +14,11 @@ function App() {
       {/* <EndGame>
 
       </EndGame> */}
-      <Board/>
+      <div className='container'>
+        <Menu/>
+        <Board/>
+      </div>
+      
     </DndProvider>
       
     </>

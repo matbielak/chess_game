@@ -172,6 +172,7 @@ function Square({row,col,piece}) {
                       
                   }
                   else{
+                    dispatch(updateSquare(payload))
                     if(p=='k'){
                       dispatch(changeCastlingRights(0));
                       dispatch(changeCastlingRights(1));
