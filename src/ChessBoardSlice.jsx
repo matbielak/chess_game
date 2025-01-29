@@ -64,6 +64,7 @@ const ChessBoardSlice = createSlice({
             }
             
             const newFen = toFen(newBoard,newWhiteMove,state.castlingRights,newPgn.length,lastMove)
+            
             return {
                 ...state,
                 board: newBoard,

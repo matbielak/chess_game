@@ -2,6 +2,8 @@ import './App.css'
 import { isKingInCheck,getAllLegalMoves } from './Moves';
 import { useDispatch,useSelector } from 'react-redux';
 import { changeBoard, resetBoard, setHistMove,flip} from './ChessBoardSlice'
+import ProgessBar from './ProgessBar'
+import GameOver from './GameOver';
 function Menu()
 { 
     const dispatch = useDispatch();
@@ -49,6 +51,8 @@ function Menu()
         <button className='button' onClick={() => dispatch(resetBoard())}>Reset</button>
         <div className='stock'>{evaluation}</div>
         <div className='stock'>{bestMove}</div>
+        <ProgessBar></ProgessBar>
+        <GameOver></GameOver>
     </div>
   )
 }
