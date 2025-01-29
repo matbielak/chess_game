@@ -1,7 +1,7 @@
 
 import Square from './Square'
 import { useSelector, useDispatch } from 'react-redux'
-import { changeBoard, resetBoard, setHistMove,flip, updateSquare, setBestMove,setEvalu} from './ChessBoardSlice'
+import { changeBoard, resetBoard, setHistMove,flip, updateSquare, setBestMove,setEvalu,deleteTemps} from './ChessBoardSlice'
 import { isKingInCheck,getAllLegalMoves,fromStockFish,isCastle,getEval} from './Moves'
 import { useEffect,useState } from 'react'
 function Board() {
@@ -36,7 +36,7 @@ function Board() {
   
           stockfishWorker.onmessage = (event) => {
               const message = event.data;
-              console.log("GOT MESSAGE",message);
+           //   console.log("GOT MESSAGE",message);
               const {move,evaluation} = getEval(message,whiteMove)
               if(move){
                 if(oldMove !== move){
@@ -44,16 +44,20 @@ function Board() {
                   dispatch(setBestMove(move));
                   setOldMove(move);
                   if(game && !whiteMove){
-                    console.log("STOCKFISHS TURN");
+                   // console.log("STOCKFISHS TURN");
                     if(game && !whiteMove){
                       const m = fromStockFish(move,board);
                       setTimeout(() => {
                         dispatch(updateSquare(m))
                       }, 2500);
                     }
+                   
                     
                   }
+                   
                 }
+
+               
                 
 
                 
@@ -90,6 +94,14 @@ function Board() {
   
       },[dispatch,whiteMove,board,game,output,oldMove]);
      
+      
+      useEffect(()=>{ 
+            
+        const updateTempRow = whiteMove ? 2 : 5;
+        for(let i=0;i<=7;i++)
+          dispatch(deleteTemps([updateTempRow,i]))
+          
+      },[whiteMove,dispatch])
       
 
 

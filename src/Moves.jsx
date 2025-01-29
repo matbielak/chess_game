@@ -18,7 +18,7 @@ const mapCols = {
 const getPawnMoves = (x,y,board,isWhite) => { 
     const validMoves = [];
     const direction = isWhite ? -1:1;
-    const pieces = isWhite ? blackp : whitep;
+    const pieces = isWhite ? blackp.slice(0,-1) : whitep.slice(0,-1);
     if(validCell(x+direction,y) && board[x+direction][y]=='-'){
         validMoves.push([x+direction,y])
 
@@ -42,7 +42,7 @@ const getRookMoves = (x,y,board,isWhite) => {
     const directions = [
         [1,0],[-1,0],[0,1],[0,-1]
     ];
-    const pieces = isWhite ? blackp : whitep;
+    const pieces = isWhite ? blackp.slice(0,-1) : whitep.slice(0,-1);
     
     
 
@@ -70,7 +70,7 @@ const getKnightMoves = (x,y,board,isWhite) => {
     const directions = [
         [2,1],[2,-1],[-2,1],[-2,-1],[-1,2],[-1,-2],[1,2],[1,-2]
     ];
-    const pieces = isWhite ? blackp : whitep;
+    const pieces = isWhite ? blackp.slice(0,-1) : whitep.slice(0,-1);
 
     for(const [dx,dy] of directions){
         const i = x + dx;
@@ -89,7 +89,7 @@ const getBishopMoves = (x,y,board,isWhite) => {
     const directions = [
         [1,1],[1,-1],[-1,1],[-1,-1],
     ];
-    const pieces = isWhite ? blackp : whitep;
+    const pieces = isWhite ? blackp.slice(0,-1) : whitep.slice(0,-1);
     for(const [dx,dy] of directions){
         let i = x + dx;
         let j = y + dy;
@@ -114,7 +114,7 @@ const getKingMoves = (x,y,board,isWhite) => {
     const directions = [
         [-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]
     ];
-    const pieces = isWhite ? blackp : whitep;
+    const pieces = isWhite ? blackp.slice(0,-1) : whitep.slice(0,-1);
     for(const [dx,dy] of directions){
         const i = x + dx;
         const j = y + dy;
@@ -250,7 +250,9 @@ export const canDropPiece = (payload,board,whiteMove) => {
      }
      const validMoves = getMoves(from.r,from.c,board);
     // console.log(to)
-    // console.log(validMoves);
+    console.log(validMoves);
+    console.log(board);
+    
     if(validMoves.some(([x,y])=> to.r==x && to.c==y)){
         if(isMoveLegal(board,from,to))
             return true;
