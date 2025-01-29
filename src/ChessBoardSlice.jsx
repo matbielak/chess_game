@@ -238,7 +238,7 @@ const ChessBoardSlice = createSlice({
             }
         },
         setEvalu: (state,action) => {
-            console.log("Action payload: ",action.payload);
+          //  console.log("Action payload: ",action.payload);
             
             const e = action.payload;
             return {

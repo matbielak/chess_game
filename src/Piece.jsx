@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import bb from './assets/bb.svg'
 import bk from './assets/bk.svg'
 import bn from './assets/bn.svg'
@@ -48,6 +49,7 @@ function renderPiece(type,drag){
 
 function Piece({type,r,c}) {
     const piece2 = useSelector((state) => state.chessboard.board[r][c])
+    const [cursorStyle,setCursorStyle] = useState("grabbing")
     const [{isDragging},drag] = useDrag(
         ()=>({
             type: 'piece',
@@ -62,12 +64,24 @@ function Piece({type,r,c}) {
         }),[piece2]
     );
 
-    
+    const handleMouseDown = () => {
+    setCursorStyle("grabbing");
+  };
+
+  const handleMouseUp = () => {
+    setCursorStyle("grab");
+  };
+
+  const handleMouseLeave = () => {
+    setCursorStyle("pointer");
+  };
 
   return (
-    <>
+    <div style={{
+        cursor: isDragging ? "grabbing" : "grab"
+    }} >
         {renderPiece(piece2,drag)}
-    </>
+    </div>
   )
 }
 
